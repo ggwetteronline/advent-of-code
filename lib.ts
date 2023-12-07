@@ -4,7 +4,7 @@ const path = require('path');
 export class lib {
   static readData(year: string, file: string, liveData:boolean): string[] {
     file = file.replace('.ts', liveData ? '-data.txt' : '-data_test.txt');
-    return fs.readFileSync(path.join(year,file), 'utf-8').split(/\r?\n/) as string[];
+    return fs.readFileSync(path.join(year,file), 'utf-8').split(/\r?\n/);
   }
 
   static getNums(input: string): number[] {
