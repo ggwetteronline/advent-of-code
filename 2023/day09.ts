@@ -1,24 +1,54 @@
 import { lib } from '../lib';
 
-const path = require('path');
-
 // function logic
 function run(data: string[], part: 'A' | 'B') {
-  const a: number[][] = [];
+  const startRows: number[][] = [];
   for(let line of data) {
-    a.push(lib.getNums(line.split(':')[1]));
+    startRows.push(lib.getNums(line));
   }
-  return a
+
+  let sum = 0;
+  for(let currentStartRow of startRows) {
+    const tmpRows: number[][] = [];
+    tmpRows.push(currentStartRow);
+    let deep = 0;
+    do {
+      tmpRows.push([]);
+      ++deep;
+      for(let i = 1; i < tmpRows[deep-1].length; ++i) {
+        tmpRows[deep].push(tmpRows[deep-1][i] - tmpRows[deep-1][i-1]);
+      }
+
+    } while(isRowZero(tmpRows[deep]) == false)
+    while( deep > 0) {
+      if(part == 'A') {
+        tmpRows[deep-1].push(tmpRows[deep-1][tmpRows[deep-1].length-1] + tmpRows[deep][tmpRows[deep].length-1])  
+      } else {
+        tmpRows[deep-1].unshift(tmpRows[deep-1][0] - tmpRows[deep][0])
+      }
+      --deep;
+    }
+    if(part == 'A') {
+    sum+= tmpRows[0][tmpRows[0].length-1]
+    } else {
+    sum+= tmpRows[0][0]
+    }
+  }
+
+  return sum;
 }
 
-// read data
-const scriptName = path.basename(__filename);
-const dataTest = lib.readData('2023', scriptName, false);
-const data = lib.readData('2023', scriptName, true);
-// execute and output
-console.log('Test aim: 12345');
-const runTest = true, runProd = false, runA = true, runB = false;
-lib.execute(dataTest, data, runTest, runProd, runA, runB, run);
+function isRowZero(arr: number[]) {
+  for(let i = 0; i < arr.length; ++i) {
+    if(arr[i] != 0) return false;
+  }
+  return true;
+}
 
-// A: 
-// B: 
+// execute and output
+console.log('Test aim: 114');
+const runTest = false, runProd = true, runA = true, runB = true;
+lib.execute(__filename, runTest, runProd, runA, runB, run);
+
+// A: 1584748274
+// B: 1026
