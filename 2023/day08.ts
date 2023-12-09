@@ -34,25 +34,25 @@ function run(data: string[], part: 'A' | 'B') {
   // you need y * route.length * x steps to reach the y-nth end node for this start node. 
   // to determine how often you have to run in circles, use the smallest common multiplier
   return kgv(
-		startingNodes.map((startingNode) =>
+    startingNodes.map((startingNode) =>
       stepsToGo(startingNode, route, endCondition)
-		),
-	);
+    ),
+  );
 }
 
 function stepsToGo (
-	fromNode: GraphNode,
-	route: Direction[],
-	until: (n: GraphNode) => boolean,
+  fromNode: GraphNode,
+  route: Direction[],
+  until: (n: GraphNode) => boolean,
 ): number {
-	let step = 0;
-	let currentNode = fromNode;
-	while (until(currentNode) == false) {
-		const direction = route[step % route.length];
-		currentNode = direction === 'L' ? currentNode.L! : currentNode.R!;
-		step++;
-	}
-	return step;
+  let step = 0;
+  let currentNode = fromNode;
+  while (until(currentNode) == false) {
+    const direction = route[step % route.length];
+    currentNode = direction === 'L' ? currentNode.L! : currentNode.R!;
+    step++;
+  }
+  return step;
 };
 
 /**
