@@ -1,6 +1,5 @@
 import { lib } from '../lib';
 
-const path = require('path');
 type Hand = {hand: string, bid: number, cardValue: number, combinationValue: number};
 
 // function logic
@@ -84,14 +83,10 @@ function compare(a: Hand, b: Hand) {
   return 0;
 }
 
-// read data
-const scriptName = path.basename(__filename);
-const dataTest = lib.readData('2023', scriptName, false);
-const data = lib.readData('2023', scriptName, true);
 // execute and output
 console.log('Test aim: 6440');
 const runTest = false, runProd = true, runA = true, runB = true;
-lib.execute(dataTest, data, runTest, runProd, runA, runB, run);
+lib.execute(__filename, runTest, runProd, runA, runB, run);
 
 // A: 249726565
 // B: 251135960

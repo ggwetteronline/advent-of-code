@@ -1,7 +1,5 @@
 import { lib } from '../lib';
 
-const path = require('path');
-
 // define types
 type MRange = { start: number, range: number };
 type Source2Dest = { source: number, destination: number, range: number };
@@ -147,14 +145,9 @@ function getSubDestinations(i: number, source: MRange, map: Source2Dest[]): { n:
   }
 }
 
-
-// read data
-const scriptName = path.basename(__filename);
-const dataTest = lib.readData('2023', scriptName, false);
-const data = lib.readData('2023', scriptName, true);
 // execute and output
 const runTest = true, runProd = true, runA = true, runB = true;
-lib.execute(dataTest, data, runTest, runProd, runA, runB, solve);
+lib.execute(__filename, runTest, runProd, runA, runB, solve);
 
 // A: 1181555926
 // B: 37806486

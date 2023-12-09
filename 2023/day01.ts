@@ -1,7 +1,5 @@
 import { lib } from '../lib';
 
-const path = require('path');
-
 // function logic
 function run(data: string[], part: 'A' | 'B') { 
   // define regex 
@@ -40,14 +38,10 @@ function replace(num: string): string {
   return num;
 }
 
-// read data
-const scriptName = path.basename(__filename);
-const dataTest = lib.readData('2023', scriptName, false);
-const data = lib.readData('2023', scriptName, true);
 // execute and output
 // Attention! test data of Part A and B are different. Change day01-data_test.txt before running test for A
 const runTest = true, runProd = true, runA = false, runB = true;
-lib.execute(dataTest, data, runTest, runProd, runA, runB, run);
+lib.execute(__filename, runTest, runProd, runA, runB, run);
 
 // A: 54390
 // B: 54277

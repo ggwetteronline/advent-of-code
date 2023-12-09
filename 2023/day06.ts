@@ -1,7 +1,5 @@
 import { lib } from '../lib';
 
-const path = require('path');
-
 // function logic
 function solve(data: string[], part: 'A' | 'B') {
   const races: { time: number, distance: number }[] = [];
@@ -31,13 +29,9 @@ function solve(data: string[], part: 'A' | 'B') {
   return totalWins;
 }
 
-// read data
-const scriptName = path.basename(__filename);
-const dataTest = lib.readData('2023', scriptName, false);
-const data = lib.readData('2023', scriptName, true);
 // execute and output
 const runTest = true, runProd = true, runA = true, runB = true;
-lib.execute(dataTest, data, runTest, runProd, runA, runB, solve);
+lib.execute(__filename, runTest, runProd, runA, runB, solve);
 
 // A: 633080
 // B: 20048741
