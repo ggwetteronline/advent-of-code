@@ -1,8 +1,5 @@
 import { lib } from '../lib';
 
-const path = require('path');
-
-
 class GraphNode {
   L?: GraphNode;
   R?: GraphNode;
