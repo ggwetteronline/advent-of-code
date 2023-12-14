@@ -44,17 +44,22 @@ export class lib {
 declare global {
   interface String {
     replaceAt(index: number, replacement: string): string;
+    countChar(needle: string): number;
   }
 
   interface Array<T> {
     transpose(): Array<T>;
     toFieldString(): string;
+    count(needle: string): number;
   }
 }
 
 
 String.prototype.replaceAt = function(index, replacement) {
   return this.substring(0, index) + replacement + this.substring(index + replacement.length);
+}
+String.prototype.countChar = function(needle:String): number {
+  return this.split('').filter(char => char == needle).length;
 }
 
 Array.prototype.transpose = function() {
@@ -64,12 +69,13 @@ Array.prototype.transpose = function() {
     return this[0].map((_: any, colIndex: number) => this.map(row => row[colIndex]));
   }
 }
-
-
 Array.prototype.toFieldString = function(): string{
   if(typeof this[0] === 'string') {
     return this.join('\n');
   } else {
     return this.map(a => a.join('')).join('\n')
   }
+}
+Array.prototype.count = function(needle:String): number {
+  return this.filter(char => char == needle).length;
 }

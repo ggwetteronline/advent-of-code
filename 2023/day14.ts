@@ -7,20 +7,20 @@ function run(data: string[], part: 'A' | 'B') {
   for(let line of data) {
     rocks.push(line.split('') as RockField[]);
   }
-  let copys: string[] = [];
   if(part == 'A') {
     tiltNorth(rocks);
   } else {
-    for(let i= 0; i <1000000000; ++i) {
+    let copys: string[] = [];
+    for(let i= 0; i < 1000000000; ++i) {
       tiltNorth(rocks);
       tiltWest(rocks);
       tiltSouth(rocks);
       tiltEast(rocks);
-      if(i >= 1000 && i<2000) {
+      if(i >= 1000 && i < 2000) {
         // shake a bit, then look for repeats
         const save = rocks.toFieldString();
         if(copys.includes(save)) {
-          const repeatIn = i - (copys.indexOf(save)+1000);
+          const repeatIn = i - (copys.indexOf(save) + 1000);
           const remaining = (1000000000 - i) % repeatIn;
           i = 1000000000 - (remaining != 0 ? remaining : repeatIn);
         }
@@ -31,7 +31,7 @@ function run(data: string[], part: 'A' | 'B') {
   // count 
   let sum = 0;
   for(let y = 0; y < rocks.length; ++y) {
-    const rocksInLine = rocks[y].filter(a => a == 'O').length;
+    const rocksInLine = rocks[y].count('O');
     sum += rocksInLine * (rocks.length-y);
   }
 
@@ -118,6 +118,7 @@ function tiltEast(input: RockField[][]): void{
 console.log('Test aim: 136, 64');
 const runTest = true, runProd = true, runA = true, runB = true;
 lib.execute(__filename, runTest, runProd, runA, runB, run);
+console.log('Expected prod: 107951, 95736');
 
 // A: 107951
 // B: 95736
