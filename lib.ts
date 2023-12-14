@@ -40,3 +40,36 @@ export class lib {
     }
   }
 }
+
+declare global {
+  interface String {
+    replaceAt(index: number, replacement: string): string;
+  }
+
+  interface Array<T> {
+    transpose(): Array<T>;
+    toFieldString(): string;
+  }
+}
+
+
+String.prototype.replaceAt = function(index, replacement) {
+  return this.substring(0, index) + replacement + this.substring(index + replacement.length);
+}
+
+Array.prototype.transpose = function() {
+  if(typeof this[0] === 'string') {
+    return this[0].split('').map((_: any, colIndex: number) => this.map(row => row[colIndex]).join(''));
+  } else {
+    return this[0].map((_: any, colIndex: number) => this.map(row => row[colIndex]));
+  }
+}
+
+
+Array.prototype.toFieldString = function(): string{
+  if(typeof this[0] === 'string') {
+    return this.join('\n');
+  } else {
+    return this.map(a => a.join('')).join('\n')
+  }
+}
