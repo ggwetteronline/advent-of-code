@@ -41,6 +41,33 @@ export class lib {
   }
 }
 
+export type Point = {x: number, y: number};
+export class Polygon {
+
+  borderLength: number = 0;
+  constructor(public points: Point[]) {}
+
+  addPoint(point: Point) {
+    this.borderLength += Math.sqrt(Math.pow(point.x - this.points[this.points.length - 1].x, 2) + Math.pow(point.y - this.points[this.points.length - 1].y, 2));
+    this.points.push(point);
+  }
+
+  calculateArea(): number {
+    let area = 0;
+    let j = this.points.length - 1;
+    for(let i = 0; i < this.points.length; i++) {
+      area += (this.points[j].x + this.points[i].x) * (this.points[j].y - this.points[i].y);
+      j = i;
+    }
+    return Math.abs(area / 2);
+  }
+
+  calculateAreaIncudingBorders(): number {
+    return this.calculateArea() + this.borderLength/2 +1;
+  }
+}
+
+
 declare global {
   interface String {
     replaceAt(index: number, replacement: string): string;
