@@ -15,8 +15,8 @@ function run(data: string[], part: 'A' | 'B') {
     workflows.set(name, new Workflow(name, ruleSet, end));
   }
   for(let part of partData) {
-    let [x,m,a,s] = (new RegExp(/(\d+).+?(\d+).+?(\d+).+?(\d+)/)).exec(part)!.slice(1);
-    parts.push({x: Number.parseInt(x), m: Number.parseInt(m), a: Number.parseInt(a), s: Number.parseInt(s)});
+    let [x,m,a,s] = (new RegExp(/(\d+).+?(\d+).+?(\d+).+?(\d+)/)).exec(part)!.slice(1).map((a) => Number.parseInt(a));
+    parts.push({x,m,a,s});
   }
 
   // execute
