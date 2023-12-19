@@ -4,40 +4,39 @@ import { lib } from '../lib';
 function run(data: string[], part: 'A' | 'B') {
   const [rules, partData] = data.join('\n').split('\n\n').map((a) => a.split('\n'));
   const workflows = new Map<string, Workflow>();;
-  const parts: Part[] = [];
   // parse input
   for(let line of rules) {
-    let [name, conditions, end] = (new RegExp(/([a-z]*)\{(.*),([a-zRA]+)\}/)).exec(line)!.slice(1);
+    let [name, conditions, end] = (new RegExp(/([a-z]+)\{(.+),([a-zRA]+)\}/)).exec(line)!.slice(1);
     const ruleSet = conditions.split(',').map((c) => {  
-      const [cat, check, count, target] = (new RegExp(/([a-z]*)([<>])(\d*):([a-zRA]*)/)).exec(c)!.slice(1);
-      return new Rule(cat as PartCategory, check, Number.parseInt(count), target);
+      const [cat, check, count, target] = (new RegExp(/([a-z]+)([<>])(\d+):([a-zRA]+)/)).exec(c)!.slice(1);
+      return new Rule(cat as PartCategory, check, +count, target);
     });
     workflows.set(name, new Workflow(name, ruleSet, end));
   }
+  const parts: Part[] = [];
   for(let part of partData) {
-    let [x,m,a,s] = (new RegExp(/(\d+).+?(\d+).+?(\d+).+?(\d+)/)).exec(part)!.slice(1).map((a) => Number.parseInt(a));
+    let [x,m,a,s] = (new RegExp(/(\d+).+?(\d+).+?(\d+).+?(\d+)/)).exec(part)!.slice(1).map(a => +a);
     parts.push({x,m,a,s});
   }
 
   // execute
   if(part === 'A') {
-    let sum = 0;
-    for(let part of parts) { 
+    return parts.sum(part => {
       let next =  workflows.get('in')!.execute(part);
       while(next !== 'R' && next !== 'A') {
         next = workflows.get(next)!.execute(part);
       }
       if(next === 'A') {
-        sum += part.x + part.m + part.a + part.s;
+        return part.x + part.m + part.a + part.s;
       }
-    }
-    return sum
+      return 0;
+    });
   }
   if(part === 'B') {
     let acceptRanges: AcceptRanges[] = [new AcceptRanges()];
     acceptRanges = workflows.get('in')!.reduceAcceptRanges(acceptRanges, workflows);
     //console.log('\n\n', 'acceptRanges', acceptRanges.map((a) => a.toString()).join('\n\n'));
-    return acceptRanges.reduce((a,b) => a + b.getCombinationCount(), 0);
+    return acceptRanges.sum(a => a.getCombinationCount());
   }
   return 1;
 }
@@ -252,10 +251,7 @@ class AcceptRanges {
   }
 
   getCombinationCount(): number {
-    const sumX = this.x.reduce((a,b) => a + b.getCombinationCount(), 0);
-    const sumM = this.m.reduce((a,b) => a + b.getCombinationCount(), 0);
-    const sumA = this.a.reduce((a,b) => a + b.getCombinationCount(), 0);
-    const sumS = this.s.reduce((a,b) => a + b.getCombinationCount(), 0);
+    const [sumX,sumM,sumA,sumS] = [this.x, this.m, this.a, this.s].map(a => a.sum(b => b.getCombinationCount()));
     return sumX * sumM * sumA * sumS;
   }
 

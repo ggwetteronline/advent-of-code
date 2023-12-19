@@ -78,6 +78,7 @@ declare global {
     transpose(): Array<T>;
     toFieldString(): string;
     count(needle: string): number;
+    sum(add?: (a:T) => number): number
   }
 }
 
@@ -105,4 +106,7 @@ Array.prototype.toFieldString = function(): string{
 }
 Array.prototype.count = function(needle:String): number {
   return this.filter(char => char == needle).length;
+}
+Array.prototype.sum = function<T>(add: (a:T) => number = a => +a): number {
+  return this.reduce((a,b) => a + add(b), 0);
 }
