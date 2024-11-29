@@ -10,5 +10,8 @@
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^20.10.2"
+  },
+  "dependencies": {
+    "z3-solver": "^4.12.4"
   }
 }

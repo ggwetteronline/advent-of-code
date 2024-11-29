@@ -1,6 +1,26 @@
 const fs = require('fs');
 const path = require('path');
 
+/*
+TODO für nächstes Jahr:
+- lib.ts ausfsplitten in 
+-- Runner (execute)
+-- Parser (readData, getNums, getAll)
+-- Geometry (Point, Polygon, Direction)
+-- String und Array Extensions
+
+- execute Methode überarbeiten, dass sie 
+
+*/
+
+export interface Run {
+  name: string,
+  data: 'prod' | 'test' | string[];
+  part: 'A' | 'B';
+  expected?: number;
+}
+
+
 export class lib {
   static readData(year: string, filepath: string, liveData:boolean): string[] {
     const file = path.basename(filepath).replace('.ts', liveData ? '-data.txt' : '-data_test.txt');
@@ -39,6 +59,20 @@ export class lib {
       if(runProd) console.log('Prod B: ', solveFun(data, 'B'));
     }
   }
+
+  static async execute2(filepath: string, solveFun: (data: string[],part: 'A' | 'B' )=>Promise<number>, runs: Run[]): Promise<void> { 
+    const dataTest = lib.readData('2023', filepath, false);
+    const dataProd = lib.readData('2023', filepath, true);
+    for(const run of runs) {
+      const data = run.data === 'prod' ? dataProd : run.data === 'test' ? dataTest : run.data;
+      const result = await solveFun(data, run.part);
+      console.log(`${run.name} ${run.part}: ${result} ${run.expected ? run.expected === result ? '✅' : '❌' : ''}`);
+    }
+  }
+
+  static time(): string {
+    return new Date().toLocaleDateString()
+  }
 }
 
 export type Point = {x: number, y: number};
@@ -67,6 +101,21 @@ export class Polygon {
   }
 }
 
+export class Direction {
+  constructor(public x: -1 | 0 | 1, public y: -1 | 0 | 1) {}
+  static getDirections(up: string = 'up', down:string = 'down', left:string = 'left', right:string = 'right'): Record<string, Direction> {
+    const record: Record<string, Direction> = {};
+    record[up] = new Direction(0, -1);
+    record[down] = new Direction(0, 1);
+    record[left] = new Direction(-1, 0);
+    record[right] = new Direction(1, 0);
+    return record;
+  }
+  go(point: Point, steps: number = 1): Point {
+    return {x: point.x + this.x * steps, y: point.y + this.y * steps};
+  }
+
+}
 
 declare global {
   interface String {
