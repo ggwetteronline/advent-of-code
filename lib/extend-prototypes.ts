@@ -16,6 +16,7 @@ declare global {
     sum(add?: (a: T) => number): number;
     toGroupsOf(size: number): Array<T>[];
     splitByEmptyLine(): Array<T[]>;
+    getLast(): T;
   }
 }
 
@@ -113,4 +114,8 @@ Array.prototype.splitByEmptyLine = function (): Array<string[]> {
   }
   ret.push(curr);
   return ret;
+};
+
+Array.prototype.getLast = function () {
+  return this[this.length - 1];
 };

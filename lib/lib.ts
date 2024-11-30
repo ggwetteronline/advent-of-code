@@ -2,11 +2,11 @@ import fs from 'fs';
 import path from 'path';
 import chalk from 'chalk';
 
-export interface Run {
+export interface Run<T extends string | number> {
   name: string;
   data: 'prod' | 'test' | string[];
   part: 'A' | 'B';
-  expected?: number;
+  expected?: T;
 }
 
 export class lib {
@@ -63,11 +63,11 @@ export class lib {
     }
   }
 
-  static async execute2(
+  static async execute2<T extends string | number>(
     year: string,
     filename: string,
-    solveFun: (data: string[], part: 'A' | 'B') => number | Promise<number>,
-    runs: Run[]
+    solveFun: (data: string[], part: 'A' | 'B') => T | Promise<T>,
+    runs: Run<T>[]
   ): Promise<void> {
     const dataTest = lib.readData(year, filename, false);
     const dataProd = lib.readData(year, filename, true);
