@@ -1,7 +1,7 @@
-import { lib } from '../lib';
+import { Run } from '../lib';
 
 // function logic
-function run(data: string[], part: 'A' | 'B') {
+export function run(data: string[], part: 'A' | 'B') {
   const nums1: number[] = [];
   const nums2: number[] = [];
   data.map((line) => {
@@ -25,10 +25,9 @@ function run(data: string[], part: 'A' | 'B') {
   }
 }
 
-// execute and output
-lib.execute2('2024', 'day01.ts', run, [
+export const runs: Run<number>[] = [
   { name: 'A test', part: 'A', data: 'test', expected: 11 },
   { name: 'A prod', part: 'A', data: 'prod', expected: 2815556 },
   { name: 'B test', part: 'B', data: 'test', expected: 31 },
   { name: 'B prod', part: 'B', data: 'prod', expected: 23927637 },
-]);
+];

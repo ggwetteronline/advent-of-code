@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "tsx 2023/day01.ts"
+    "start": "tsx 2023/day01.ts",
+    "day": "tsx main.ts"
   },
   "author": "Gernot Goetz",
   "license": "ISC",

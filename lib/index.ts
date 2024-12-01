@@ -1,5 +1,5 @@
 import './extend-prototypes';
-import { lib } from './lib';
+import { lib, Run } from './lib';
 import { Direction, Point, Polygon } from './geometry';
 
-export { lib, Direction, type Point, Polygon };
+export { lib, type Run, Direction, type Point, Polygon };
