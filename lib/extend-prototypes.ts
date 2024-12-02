@@ -17,6 +17,13 @@ declare global {
     toGroupsOf(size: number): Array<T>[];
     splitByEmptyLine(): Array<T[]>;
     getLast(): T;
+    isDescending(): boolean;
+    isAscending(): boolean;
+  }
+
+  interface Number {
+    diffTo(other: number): number;
+    between(min: number, max: number): boolean;
   }
 }
 
@@ -118,4 +125,28 @@ Array.prototype.splitByEmptyLine = function (): Array<string[]> {
 
 Array.prototype.getLast = function () {
   return this[this.length - 1];
+};
+
+Array.prototype.isDescending = function () {
+  for (let i = 1; i < this.length; i++) {
+    if (this[i] > this[i - 1]) {
+      return false;
+    }
+  }
+  return true;
+};
+Array.prototype.isAscending = function () {
+  for (let i = 1; i < this.length; i++) {
+    if (this[i] < this[i - 1]) {
+      return false;
+    }
+  }
+  return true;
+};
+
+Number.prototype.diffTo = function (other: number): number {
+  return Math.abs(Number(this) - other);
+};
+Number.prototype.between = function (min: number, max: number): boolean {
+  return Number(this) >= min && Number(this) <= max;
 };
