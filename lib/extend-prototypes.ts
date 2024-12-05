@@ -7,6 +7,8 @@ declare global {
     getCommonLetter(others: string | string[]): string;
     charToNumber(): number;
     splitAt(index: number): [string, string];
+    hasIndex(index: number): boolean;
+    centerIndex(): number;
   }
 
   interface Array<T> {
@@ -19,6 +21,10 @@ declare global {
     getLast(): T;
     isDescending(): boolean;
     isAscending(): boolean;
+    hasIndex(index: number): boolean;
+    centerIndex(): number;
+    centerItem(): T;
+    includesAll(needles: T[]): boolean;
   }
 
   interface Number {
@@ -71,6 +77,14 @@ String.prototype.charToNumber = function (): number {
 
 String.prototype.splitAt = function (index: number): [string, string] {
   return [this.substring(0, index), this.substring(index)];
+};
+
+String.prototype.hasIndex = function (index: number): boolean {
+  return index >= 0 && index < this.length;
+};
+
+String.prototype.centerIndex = function (): number {
+  return Math.floor(this.length / 2);
 };
 
 Array.prototype.transpose = function () {
@@ -144,9 +158,22 @@ Array.prototype.isAscending = function () {
   return true;
 };
 
+Array.prototype.hasIndex = function (index: number) {
+  return index >= 0 && index < this.length;
+};
+
 Number.prototype.diffTo = function (other: number): number {
   return Math.abs(Number(this) - other);
 };
 Number.prototype.between = function (min: number, max: number): boolean {
   return Number(this) >= min && Number(this) <= max;
+};
+Array.prototype.centerIndex = function (): number {
+  return Math.floor(this.length / 2);
+};
+Array.prototype.centerItem = function () {
+  return this[this.centerIndex()];
+};
+Array.prototype.includesAll = function <T>(needles: T[]): boolean {
+  return needles.every((needle) => this.includes(needle));
 };

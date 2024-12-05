@@ -1,4 +1,4 @@
-import { Run } from '../lib';
+import { Run, Direction, Point } from '../lib';
 
 // function logic
 export function run(data: string[], part: 'A' | 'B') {
@@ -7,7 +7,7 @@ export function run(data: string[], part: 'A' | 'B') {
     for (let row = 0; row < data.length; row++) {
       for (let col = 0; col < data[row].length; col++) {
         if (data[row][col] === 'X') {
-          sum += checkXMAS(data, row, col);
+          sum += checkXMAS(data, { x: col, y: row });
         }
       }
     }
@@ -33,42 +33,18 @@ export function run(data: string[], part: 'A' | 'B') {
  * @param col col, where we found X
  * @returns amount of XMAS found from this position
  */
-function checkXMAS(data: string[], row: number, col: number): number {
-  const directions = [
-    [-1, 0], // up
-    [1, 0], // down
-    [0, -1], // left
-    [0, 1], // right
-    [-1, -1], // up-left
-    [-1, 1], // up-right
-    [1, -1], // down-left
-    [1, 1], // down-right
-  ];
+function checkXMAS(data: string[], startPoint: Point): number {
+  const directions = Direction.getDirectionsArray();
   const targetWord = 'XMAS';
-  const wordLength = targetWord.length;
   let foundWords = 0;
-
   for (const direction of directions) {
-    let x = col;
-    let y = row;
-    let matches = true; // if the word matches till now
-    // start at 1, because we already found X
-    for (let i = 1; i < wordLength && matches; i++) {
-      x += direction[0];
-      y += direction[1];
-      // Check if the new position is within bounds
-      if (x < 0 || x >= data[0].length || y < 0 || y >= data.length) {
-        matches = false;
-        break;
+    try {
+      if (direction.getValuesFromLine(data, startPoint, 4) == targetWord) {
+        foundWords++;
       }
-      // Check if the character matches the word
-      if (data[y][x] !== targetWord[i]) {
-        matches = false;
-        break;
-      }
-    }
-    if (matches) {
-      ++foundWords;
+    } catch (e) {
+      // error is thrown, if we are out of bounds
+      // do nothing
     }
   }
   return foundWords;
@@ -82,13 +58,17 @@ function checkXMAS(data: string[], row: number, col: number): number {
  * @returns true, if this is a X-MAS
  */
 function checkMAS(data: string[], row: number, col: number): boolean {
+  const topLeft = data[row - 1][col - 1];
+  const topRight = data[row - 1][col + 1];
+  const bottomLeft = data[row + 1][col - 1];
+  const bottomRight = data[row + 1][col + 1];
   return (
     // diagonal top left to bottom right must be MAS or SAM
-    ((data[row - 1][col - 1] === 'M' && data[row + 1][col + 1] === 'S') ||
-      (data[row - 1][col - 1] === 'S' && data[row + 1][col + 1] === 'M')) &&
+    ((topLeft === 'M' && bottomRight === 'S') ||
+      (topLeft === 'S' && bottomRight === 'M')) &&
     // diagonal top right to bottom left must be MAS or SAM
-    ((data[row - 1][col + 1] === 'M' && data[row + 1][col - 1] === 'S') ||
-      (data[row - 1][col + 1] === 'S' && data[row + 1][col - 1] === 'M'))
+    ((topRight === 'M' && bottomLeft === 'S') ||
+      (topRight === 'S' && bottomLeft === 'M'))
   );
 }
 
