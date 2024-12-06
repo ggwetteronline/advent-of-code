@@ -2,29 +2,42 @@ export {};
 
 declare global {
   interface String {
-    replaceAt(index: number, replacement: string): string;
-    countChar(needle: string): number;
-    getCommonLetter(others: string | string[]): string;
-    charToNumber(): number;
-    splitAt(index: number): [string, string];
+    // items
     hasIndex(index: number): boolean;
     centerIndex(): number;
+    splitAt(index: number): [string, string];
+
+    // editing
+    replaceAt(index: number, replacement: string): string;
+
+    // calculations
+    countChar(needle: string): number;
+    charToNumber(): number;
+    getCommonLetter(others: string | string[]): string;
   }
 
   interface Array<T> {
-    transpose(): Array<T>;
-    toFieldString(): string;
-    count(needle: string): number;
-    sum(add?: (a: T) => number): number;
-    toGroupsOf(size: number): Array<T>[];
-    splitByEmptyLine(): Array<T[]>;
+    // items
     getLast(): T;
-    isDescending(): boolean;
-    isAscending(): boolean;
     hasIndex(index: number): boolean;
+    hasIndex2D(row: number, col: number): boolean;
     centerIndex(): number;
     centerItem(): T;
+
+    // reordering
+    transpose(): Array<T>;
+    toGroupsOf(size: number): Array<T>[];
+    splitByEmptyLine(): Array<T[]>;
+
+    // checks
+    isDescending(): boolean;
+    isAscending(): boolean;
     includesAll(needles: T[]): boolean;
+
+    // calculations
+    sum(add?: (a: T) => number): number;
+    count(needle: string): number;
+    toFieldString(): string;
   }
 
   interface Number {
@@ -160,6 +173,14 @@ Array.prototype.isAscending = function () {
 
 Array.prototype.hasIndex = function (index: number) {
   return index >= 0 && index < this.length;
+};
+Array.prototype.hasIndex2D = function (y_row: number, x_col: number): boolean {
+  return (
+    y_row >= 0 &&
+    y_row < this.length &&
+    x_col >= 0 &&
+    x_col < this[y_row].length
+  );
 };
 
 Number.prototype.diffTo = function (other: number): number {

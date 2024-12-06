@@ -1,3 +1,5 @@
+import { Dir } from 'fs';
+
 export type Point = { x: number; y: number };
 export class Polygon {
   borderLength: number = 0;
@@ -102,6 +104,32 @@ export class Direction {
 
     return record;
   }
+
+  static getDirection(name: DirectionName): Direction {
+    switch (name) {
+      case 'N':
+        return new Direction(0, -1);
+      case 'S':
+        return new Direction(0, 1);
+      case 'W':
+        return new Direction(-1, 0);
+      case 'E':
+        return new Direction(1, 0);
+      case 'NW':
+        return new Direction(-1, -1);
+      case 'NE':
+        return new Direction(1, -1);
+      case 'SW':
+        return new Direction(-1, 1);
+      case 'SE':
+        return new Direction(1, 1);
+    }
+  }
+
+  copy(): Direction {
+    return new Direction(this.x, this.y);
+  }
+
   go(point: Point, steps: number = 1): Point {
     return { x: point.x + this.x * steps, y: point.y + this.y * steps };
   }
@@ -129,5 +157,36 @@ export class Direction {
       }
     }
     return values;
+  }
+
+  rotateRight(): Direction {
+    if (this.x === 0 && this.y === -1) return new Direction(1, 0);
+    if (this.x === 1 && this.y === 0) return new Direction(0, 1);
+    if (this.x === 0 && this.y === 1) return new Direction(-1, 0);
+    if (this.x === -1 && this.y === 0) return new Direction(0, -1);
+    if (this.x === -1 && this.y === -1) return new Direction(1, -1);
+    if (this.x === 1 && this.y === -1) return new Direction(1, 1);
+    if (this.x === -1 && this.y === 1) return new Direction(-1, 1);
+    if (this.x === 1 && this.y === 1) return new Direction(-1, -1);
+    throw new Error('Invalid direction');
+  }
+
+  rotateLeft(): Direction {
+    if (this.x === 0 && this.y === -1) return new Direction(-1, 0);
+    if (this.x === -1 && this.y === 0) return new Direction(0, 1);
+    if (this.x === 0 && this.y === 1) return new Direction(1, 0);
+    if (this.x === 1 && this.y === 0) return new Direction(0, -1);
+    if (this.x === -1 && this.y === -1) return new Direction(-1, 1);
+    if (this.x === 1 && this.y === -1) return new Direction(-1, -1);
+    if (this.x === -1 && this.y === 1) return new Direction(1, 1);
+    if (this.x === 1 && this.y === 1) return new Direction(1, -1);
+    throw new Error('Invalid direction');
+  }
+
+  turnAround(): Direction {
+    return new Direction(
+      (this.x * -1) as 0 | 1 | -1,
+      (this.y * -1) as 0 | 1 | -1
+    );
   }
 }

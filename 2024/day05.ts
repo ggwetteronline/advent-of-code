@@ -22,7 +22,7 @@ export function run(data: string[], part: 'A' | 'B') {
             }
           }
         }
-        // return center number of update
+        // if no rule was violated return center number of update
         return update.centerItem();
       })
       .sum();
@@ -41,6 +41,7 @@ export function run(data: string[], part: 'A' | 'B') {
               }
             }
           }
+          // order is correct, so no update
           return false;
         })
         // change order, so the rules apply
