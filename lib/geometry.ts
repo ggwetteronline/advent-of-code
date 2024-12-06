@@ -1,5 +1,3 @@
-import { Dir } from 'fs';
-
 export type Point = { x: number; y: number };
 export class Polygon {
   borderLength: number = 0;
@@ -188,5 +186,51 @@ export class Direction {
       (this.x * -1) as 0 | 1 | -1,
       (this.y * -1) as 0 | 1 | -1
     );
+  }
+}
+
+export abstract class BaseLocation {}
+
+export class BaseLocationMap<T extends BaseLocation> {
+  static createFromInput<T extends BaseLocation>(
+    input: string[],
+    parseInput: (char: string, x: number, y: number) => T
+  ): BaseLocationMap<T> {
+    const map = new BaseLocationMap<T>();
+    input.forEach((line, y) => {
+      map.map[y] = [];
+      line.split('').forEach((char, x) => {
+        map.map[y][x] = parseInput(char, x, y);
+      });
+    });
+
+    return map;
+  }
+
+  map: T[][] = [];
+
+  constructor() {}
+
+  allLocations(): T[] {
+    return this.map.flat();
+  }
+
+  hasPosition(point: Point): boolean {
+    return (
+      this.map[point.y] !== undefined &&
+      this.map[point.y][point.x] !== undefined
+    );
+  }
+
+  getLocation(point: Point): T {
+    return this.map[point.y][point.x];
+  }
+
+  for(callback: (location: T, x: number, y: number) => void) {
+    this.map.forEach((row, y) => {
+      row.forEach((location, x) => {
+        callback(location, x, y);
+      });
+    });
   }
 }
