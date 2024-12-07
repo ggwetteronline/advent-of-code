@@ -1,4 +1,10 @@
-import { BaseLocation, BaseLocationMap, Direction, Point, Run } from '../lib';
+import {
+  BaseLocation,
+  BaseLocationMap,
+  Direction,
+  LocationRunner,
+  Run,
+} from '../lib';
 
 // function logic
 export function run(data: string[], part: 'A' | 'B') {
@@ -17,25 +23,41 @@ export function run(data: string[], part: 'A' | 'B') {
     }
     return loc;
   });
+  const guardCopy = guard.copy();
 
+  let status = guard.moveTillObstacleAndTurnRight(locationMap);
+  while (status !== EndCondition.OutOfBounds) {
+    status = guard.moveTillObstacleAndTurnRight(locationMap);
+  }
   if (part === 'A') {
-    let status = guard.moveTillObstacleAndTurnRight(locationMap);
-    while (status !== EndCondition.OutOfBounds) {
-      status = guard.moveTillObstacleAndTurnRight(locationMap);
-    }
     //get count of visited locations
     return locationMap.allLocations().filter((loc) => loc.visited).length;
   } else {
-    const guardCopy = new Guard();
-    guardCopy.direction = guard.direction.copy();
-    guardCopy.pos = { x: guard.pos.x, y: guard.pos.y };
-    // place an obstacle on every position
+    // Optimization idea for part 2:
+    // Let the guard move backwards from the end location to the start location
+    // So we do not have to calculate the way he needed to get there
+
+    // reset guard and locationMap
+    guard.reset(guardCopy);
+    const locationCopy = locationMap.copy();
+    locationMap.for((loc) => {
+      loc.visited = false;
+      loc.movedThroughDirections = [];
+    });
+
+    // place an obstacle on every position of the way which the guard walked in part 1
     let count = 0;
     locationMap.for((loc, x, y) => {
       if (loc.obstacle || (guard.pos.x === x && guard.pos.y === y)) {
         // skip if there already is an obstacle or guard is on this location
         return;
       }
+      if (locationCopy.getLocation({ x, y }).visited == false) {
+        // if a location was not visited for part 1, it won't be visited in part 2
+        // so no need to check what happens if we place a obstacle here
+        return;
+      }
+
       // add temporary obstacle
       loc.obstacle = true;
       // check if the guard moves in circles
@@ -44,7 +66,7 @@ export function run(data: string[], part: 'A' | 'B') {
         // obstacle reached
         status = guard.moveTillObstacleAndTurnRight(locationMap);
       }
-      if (status == EndCondition.LocationAlreadyVisited) {
+      if (status == EndCondition.RunInCircle) {
         // running in circles
         count++;
       }
@@ -54,8 +76,7 @@ export function run(data: string[], part: 'A' | 'B') {
         loc.movedThroughDirections = [];
       });
       // reset guard position
-      guard.pos = { x: guardCopy.pos.x, y: guardCopy.pos.y };
-      guard.direction = guardCopy.direction.copy();
+      guard.reset(guardCopy);
       // remove temporary obstacle
       loc.obstacle = false;
     });
@@ -66,53 +87,61 @@ export function run(data: string[], part: 'A' | 'B') {
 enum EndCondition {
   OutOfBounds,
   ObstacleReached,
-  LocationAlreadyVisited,
+  RunInCircle,
 }
 
-class Guard {
-  pos: Point = { x: 0, y: 0 };
-  direction: Direction = Direction.getDirection('N');
-  constructor() {}
+class Guard extends LocationRunner {
+  constructor() {
+    super();
+  }
+
+  copy(): Guard {
+    const guard = new Guard();
+    guard.pos = { x: this.pos.x, y: this.pos.y };
+    guard.direction = this.direction.copy();
+    return guard;
+  }
+
+  reset(guard: Guard) {
+    this.pos = { x: guard.pos.x, y: guard.pos.y };
+    this.direction = guard.direction.copy();
+  }
 
   moveTillObstacleAndTurnRight(
     locations: BaseLocationMap<Location>
   ): EndCondition {
-    while (true) {
-      const nextPos = this.direction.go(this.pos);
-      if (!locations.hasPosition(nextPos)) {
-        return EndCondition.OutOfBounds;
+    const endReason = this.moveForwardWhile(
+      locations,
+      (checkLocation: Location) => {
+        if (checkLocation.obstacle) {
+          this.direction = this.direction.rotateRight();
+          return EndCondition.ObstacleReached;
+        }
+        if (checkLocation.wasMovedThroughInThisDirection(this.direction)) {
+          return EndCondition.RunInCircle;
+        }
+        return 'continue';
       }
-      const loc = locations.getLocation(nextPos);
-      if (loc.obstacle) {
-        this.direction = this.direction.rotateRight();
-        return EndCondition.ObstacleReached;
-      }
-      if (loc.wasMovedThroughInThisDirection(this.direction)) {
-        return EndCondition.LocationAlreadyVisited;
-      }
-      loc.moveThrough(this.direction);
-      this.pos = nextPos;
+    );
+    if (endReason === 'OutOfBounds') {
+      return EndCondition.OutOfBounds;
+    } else {
+      return endReason;
     }
   }
 }
 
 class Location extends BaseLocation {
-  visited: boolean = false;
   obstacle: boolean = false;
-  movedThroughDirections: Direction[] = [];
 
   constructor() {
     super();
   }
 
-  moveThrough(direction: Direction) {
-    this.visited = true;
-    this.movedThroughDirections.push(new Direction(direction.x, direction.y));
-  }
-  wasMovedThroughInThisDirection(direction: Direction) {
-    return this.movedThroughDirections.some(
-      (dir) => dir.x === direction.x && dir.y === direction.y
-    );
+  copy(newLocation = new Location()): Location {
+    const loc = super.copy(newLocation) as Location;
+    loc.obstacle = this.obstacle;
+    return loc;
   }
 }
 
