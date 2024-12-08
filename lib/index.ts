@@ -6,6 +6,7 @@ import {
   Polygon,
   BaseLocation,
   BaseLocationMap,
+  LocationRunner,
 } from './geometry';
 
 export {
@@ -13,6 +14,7 @@ export {
   type Run,
   BaseLocation,
   BaseLocationMap,
+  LocationRunner,
   Direction,
   type Point,
   Polygon,

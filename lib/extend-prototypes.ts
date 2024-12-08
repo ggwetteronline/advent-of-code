@@ -23,6 +23,7 @@ declare global {
     hasIndex2D(row: number, col: number): boolean;
     centerIndex(): number;
     centerItem(): T;
+    mapPairs<U>(callback: (a: T, b: T) => U): U[];
 
     // reordering
     transpose(): Array<T>;
@@ -197,4 +198,13 @@ Array.prototype.centerItem = function () {
 };
 Array.prototype.includesAll = function <T>(needles: T[]): boolean {
   return needles.every((needle) => this.includes(needle));
+};
+Array.prototype.mapPairs = function <T, U>(callback: (a: T, b: T) => U): U[] {
+  const ret: U[] = [];
+  for (let i = 0; i < this.length; i++) {
+    for (let j = i + 1; j < this.length; j++) {
+      ret.push(callback(this[i], this[j]));
+    }
+  }
+  return ret;
 };

@@ -189,7 +189,32 @@ export class Direction {
   }
 }
 
-export abstract class BaseLocation {}
+export abstract class BaseLocation {
+  x = 0;
+  y = 0;
+  visited: boolean = false;
+  movedThroughDirections: Direction[] = [];
+
+  copy(newLocation = this.constructor()): BaseLocation {
+    newLocation.x = this.x;
+    newLocation.y = this.y;
+    newLocation.visited = this.visited;
+    newLocation.movedThroughDirections = this.movedThroughDirections.map(
+      (dir) => dir.copy()
+    );
+    return newLocation;
+  }
+
+  moveThrough(direction: Direction) {
+    this.visited = true;
+    this.movedThroughDirections.push(new Direction(direction.x, direction.y));
+  }
+  wasMovedThroughInThisDirection(direction: Direction) {
+    return this.movedThroughDirections.some(
+      (dir) => dir.x === direction.x && dir.y === direction.y
+    );
+  }
+}
 
 export class BaseLocationMap<T extends BaseLocation> {
   static createFromInput<T extends BaseLocation>(
@@ -201,6 +226,8 @@ export class BaseLocationMap<T extends BaseLocation> {
       map.map[y] = [];
       line.split('').forEach((char, x) => {
         map.map[y][x] = parseInput(char, x, y);
+        map.map[y][x].x = x;
+        map.map[y][x].y = y;
       });
     });
 
@@ -210,6 +237,12 @@ export class BaseLocationMap<T extends BaseLocation> {
   map: T[][] = [];
 
   constructor() {}
+
+  copy(): BaseLocationMap<T> {
+    const newMap = new BaseLocationMap<T>();
+    newMap.map = this.map.map((row) => row.map((loc) => loc.copy() as T));
+    return newMap;
+  }
 
   allLocations(): T[] {
     return this.map.flat();
@@ -232,5 +265,39 @@ export class BaseLocationMap<T extends BaseLocation> {
         callback(location, x, y);
       });
     });
+  }
+
+  print(callback: (location: T) => string): void {
+    console.log(
+      this.map.map((row) => row.map((loc) => callback(loc)).join('')).join('\n')
+    );
+  }
+}
+
+export class LocationRunner {
+  pos: Point = { x: 0, y: 0 };
+  direction: Direction = Direction.getDirection('N');
+
+  moveForwardWhile<
+    T extends BaseLocationMap<L>,
+    L extends BaseLocation,
+    EndCondition
+  >(
+    locationMap: T,
+    callback: (checkLocation: L) => EndCondition | 'continue'
+  ): EndCondition | 'OutOfBounds' {
+    while (true) {
+      const nextPos = this.direction.go(this.pos);
+      if (!locationMap.hasPosition(nextPos)) {
+        return 'OutOfBounds';
+      }
+      const loc = locationMap.getLocation(nextPos);
+      const endCondition = callback(loc);
+      if (endCondition !== 'continue') {
+        return endCondition;
+      }
+      loc.moveThrough(this.direction);
+      this.pos = nextPos;
+    }
   }
 }

@@ -72,6 +72,7 @@ export class lib {
     const dataTest = lib.readData(year, filename, false);
     const dataProd = lib.readData(year, filename, true);
     for (const run of runs) {
+      console.time('Execution time');
       const data =
         run.data === 'prod'
           ? dataProd
@@ -85,6 +86,7 @@ export class lib {
           ? chalk.green(`${result} ✅`)
           : chalk.red(`${result} ❌`)
       );
+      console.timeEnd('Execution time');
     }
   }
 
