@@ -94,3 +94,23 @@ export class lib {
     return new Date().toLocaleDateString();
   }
 }
+
+// Attention! using this method can double the execution time compared to a recursive function with memo without inner function call
+export function recursiveWithMemory<T>(
+  //keyfun: (...args: any[]) => string,
+  fun: (recursion: (...args2: any[]) => T, ...args: any[]) => T,
+  ...args: any[]
+): T {
+  const memo: Map<string, T> = new Map<string, T>();
+
+  const recursiveRun = (...args: any[]) => {
+    const key = args.join('-'); //keyfun(args);
+    if (memo.has(key)) {
+      return memo.get(key)!;
+    }
+    const result = fun(recursiveRun, ...args);
+    memo.set(key, result);
+    return result;
+  };
+  return recursiveRun(...args);
+}

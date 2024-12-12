@@ -28,6 +28,7 @@ declare global {
     // reordering
     transpose(): Array<T>;
     toGroupsOf(size: number): Array<T>[];
+    groupBy<S>(a: (element: T) => S): Array<T>[];
     splitByEmptyLine(): Array<T[]>;
 
     // checks
@@ -44,6 +45,7 @@ declare global {
   interface Number {
     diffTo(other: number): number;
     between(min: number, max: number): boolean;
+    numberOfDigits(): number;
   }
 }
 
@@ -136,6 +138,20 @@ Array.prototype.toGroupsOf = function <T>(size: number): Array<T>[] {
   return ret;
 };
 
+Array.prototype.groupBy = function <T, S>(
+  getKey: (element: T) => S
+): Array<T>[] {
+  const ret: Array<T>[] = [];
+  const map = new Map<S, T[]>();
+  for (const element of this) {
+    const key = getKey(element);
+    if (map.has(key)) map.get(key)!.push(element);
+    else map.set(key, [element]);
+  }
+  map.forEach((value) => ret.push(value));
+  return ret;
+};
+
 Array.prototype.splitByEmptyLine = function (): Array<string[]> {
   const ret: string[][] = [];
   let curr: string[] = [];
@@ -184,12 +200,6 @@ Array.prototype.hasIndex2D = function (y_row: number, x_col: number): boolean {
   );
 };
 
-Number.prototype.diffTo = function (other: number): number {
-  return Math.abs(Number(this) - other);
-};
-Number.prototype.between = function (min: number, max: number): boolean {
-  return Number(this) >= min && Number(this) <= max;
-};
 Array.prototype.centerIndex = function (): number {
   return Math.floor(this.length / 2);
 };
@@ -207,4 +217,16 @@ Array.prototype.mapPairs = function <T, U>(callback: (a: T, b: T) => U): U[] {
     }
   }
   return ret;
+};
+
+Number.prototype.diffTo = function (other: number): number {
+  return Math.abs(Number(this) - other);
+};
+Number.prototype.between = function (min: number, max: number): boolean {
+  return Number(this) >= min && Number(this) <= max;
+};
+
+Number.prototype.numberOfDigits = function (): number {
+  if (Number(this) === 0) return 1;
+  return Math.floor(Math.log10(Math.abs(Number(this)))) + 1;
 };

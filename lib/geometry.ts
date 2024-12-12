@@ -124,11 +124,22 @@ export class Direction {
     }
   }
 
+  isVertical(): boolean {
+    return this.x === 0;
+  }
+  isHorizontal(): boolean {
+    return this.y === 0;
+  }
+
   copy(): Direction {
     return new Direction(this.x, this.y);
   }
 
-  go(point: Point, steps: number = 1): Point {
+  equals(direction: Direction): boolean {
+    return this.x === direction.x && this.y === direction.y;
+  }
+
+  go(point: Point | BaseLocation, steps: number = 1): Point {
     return { x: point.x + this.x * steps, y: point.y + this.y * steps };
   }
 
@@ -194,6 +205,7 @@ export abstract class BaseLocation {
   y = 0;
   visited: boolean = false;
   movedThroughDirections: Direction[] = [];
+  partOfArea = false;
 
   copy(newLocation = this.constructor()): BaseLocation {
     newLocation.x = this.x;
@@ -213,6 +225,31 @@ export abstract class BaseLocation {
     return this.movedThroughDirections.some(
       (dir) => dir.x === direction.x && dir.y === direction.y
     );
+  }
+
+  addRecursiveToArea<T extends BaseLocation>(
+    map: BaseLocationMap<T>,
+    area: BaseArea<T, BaseLocationMap<T>>,
+    isSameArea: (a: T, b: T) => boolean,
+    directions: 'all' | '+' | 'x' = '+'
+  ) {
+    if (this.partOfArea) return; // each location can only be in one area.
+
+    area.addLocation(this as unknown as T);
+    this.partOfArea = true;
+
+    const directionList = Direction.getDirectionsArray(directions);
+    for (const dir of directionList) {
+      const nextPos = dir.go(this);
+      if (
+        map.hasPosition(nextPos) &&
+        isSameArea(this as unknown as T, map.getLocation(nextPos))
+      ) {
+        map
+          .getLocation(nextPos)
+          .addRecursiveToArea(map, area, isSameArea, directions);
+      }
+    }
   }
 }
 
@@ -270,6 +307,96 @@ export class BaseLocationMap<T extends BaseLocation> {
   print(callback: (location: T) => string): void {
     console.log(
       this.map.map((row) => row.map((loc) => callback(loc)).join('')).join('\n')
+    );
+  }
+
+  createAreas<U extends BaseArea<T, BaseLocationMap<T>>>(
+    createArea: (loc: T, map: BaseLocationMap<T>) => U,
+    isSameArea: (a: T, b: T) => boolean,
+    directions: '+' | 'x' | 'all' = 'all'
+  ): U[] {
+    const areas: U[] = [];
+    this.for((loc) => {
+      if (loc.partOfArea) return;
+      const area = createArea(loc, this);
+      loc.addRecursiveToArea(this, area, isSameArea, directions);
+      areas.push(area);
+    });
+
+    return areas;
+  }
+}
+
+/**
+ * Base class for areas
+ *
+ * An area is a connected subset of locations inside a BaseLocationMap
+ */
+export class BaseArea<T extends BaseLocation, M extends BaseLocationMap<T>> {
+  locations: T[] = [];
+
+  constructor(public areaName: string, public map: M) {}
+
+  print(
+    inMap: boolean,
+    callback: (location: T) => string = (loc) => this.areaName,
+    notInArea: string = '.'
+  ): void {
+    if (inMap) {
+      this.map.print((loc) => {
+        return this.locations.some((l) => l.x === loc.x && l.y === loc.y)
+          ? callback(loc)
+          : notInArea;
+      });
+    } else {
+      // print only the area
+      const minX = Math.min(...this.locations.map((loc) => loc.x));
+      const maxX = Math.max(...this.locations.map((loc) => loc.x));
+      const minY = Math.min(...this.locations.map((loc) => loc.y));
+      const maxY = Math.max(...this.locations.map((loc) => loc.y));
+      for (let y = minY; y <= maxY; y++) {
+        let line = '';
+        for (let x = minX; x <= maxX; x++) {
+          line += this.locations.some((loc) => loc.x === x && loc.y === y)
+            ? callback(this.map.getLocation({ x, y }) as T)
+            : notInArea;
+        }
+        console.log(line);
+      }
+    }
+  }
+
+  getAreaSize(): number {
+    return this.locations.length;
+  }
+
+  calculatePerimeter(): number {
+    let perimeter = 0;
+    const directions = Direction.getDirectionsArray('+');
+    for (const loc of this.locations) {
+      for (const dir of directions) {
+        const nextPos = dir.go(loc);
+        if (this.hasLocation(nextPos) == false) {
+          perimeter++;
+        }
+      }
+    }
+    return perimeter;
+  }
+
+  addLocation(location: T): void {
+    this.locations.push(location);
+  }
+
+  hasLocation(location: Point): boolean {
+    return this.locations.some(
+      (loc) => loc.x === location.x && loc.y === location.y
+    );
+  }
+
+  getLocation(location: Point): T | undefined {
+    return this.locations.find(
+      (loc) => loc.x === location.x && loc.y === location.y
     );
   }
 }

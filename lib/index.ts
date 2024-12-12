@@ -1,5 +1,5 @@
 import './extend-prototypes';
-import { lib, Run } from './lib';
+import { lib, Run, recursiveWithMemory } from './lib';
 import {
   Direction,
   Point,
@@ -7,15 +7,18 @@ import {
   BaseLocation,
   BaseLocationMap,
   LocationRunner,
+  BaseArea,
 } from './geometry';
 
 export {
   lib,
+  recursiveWithMemory as recursiveWithMemo,
   type Run,
   BaseLocation,
   BaseLocationMap,
   LocationRunner,
   Direction,
+  BaseArea,
   type Point,
   Polygon,
 };

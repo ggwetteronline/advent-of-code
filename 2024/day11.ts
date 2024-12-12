@@ -1,4 +1,4 @@
-import { Run } from '../lib';
+import { recursiveWithMemo as recursiveWithMemory, Run } from '../lib';
 
 // function logic
 export function run(data: string[], part: 'A' | 'B') {
@@ -7,12 +7,23 @@ export function run(data: string[], part: 'A' | 'B') {
 
   return nums
     .map((n) => {
-      return recursiveBlink(n, blink);
+      return recursiveWithMemory(
+        (rec, num: number, repeat: number) => {
+          if (repeat === 0) return 1;
+          return blinkf(num)
+            .map((n) => rec(n, repeat - 1))
+            .sum();
+        },
+        n,
+        blink
+      );
+
+      //return recursiveBlink(n, blink);
     })
     .sum();
 }
 
-function blink(num: number): number[] {
+function blinkf(num: number): number[] {
   if (num === 0) {
     // replace 0 by 1
     return [1];
@@ -44,7 +55,7 @@ function recursiveBlink(num: number, repeat: number): number {
   if (repeat === 0) {
     result = 1;
   } else {
-    result = blink(num)
+    result = blinkf(num)
       .map((n) => recursiveBlink(n, repeat - 1))
       .sum();
   }
