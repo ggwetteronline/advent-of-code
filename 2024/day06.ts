@@ -17,7 +17,7 @@ export function run(data: string[], part: 'A' | 'B') {
     }
     if (char === '^') {
       // we always start facing north
-      guard.direction = Direction.getDirection('N');
+      guard.direction = Direction.N;
       guard.pos = { x, y };
       loc.visited = true;
     }

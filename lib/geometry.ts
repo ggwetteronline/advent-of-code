@@ -30,6 +30,15 @@ export class Polygon {
 
 export type DirectionName = 'N' | 'W' | 'S' | 'E' | 'NW' | 'NE' | 'SW' | 'SE';
 export class Direction {
+  static N = new Direction(0, -1);
+  static S = new Direction(0, 1);
+  static W = new Direction(-1, 0);
+  static E = new Direction(1, 0);
+  static NW = new Direction(-1, -1);
+  static NE = new Direction(1, -1);
+  static SW = new Direction(-1, 1);
+  static SE = new Direction(1, 1);
+
   /**
    *    -1  0  1 x
    * -1  NW N NE
@@ -40,7 +49,7 @@ export class Direction {
    * @param x x direction
    * @param y y direction
    */
-  constructor(public x: -1 | 0 | 1, public y: -1 | 0 | 1) {}
+  constructor(public readonly x: -1 | 0 | 1, public readonly y: -1 | 0 | 1) {}
 
   static getDirectionsArray(which: '+' | 'x' | 'all' = 'all'): Direction[] {
     switch (which) {
@@ -103,25 +112,40 @@ export class Direction {
     return record;
   }
 
-  static getDirection(name: DirectionName): Direction {
-    switch (name) {
-      case 'N':
-        return new Direction(0, -1);
-      case 'S':
-        return new Direction(0, 1);
-      case 'W':
-        return new Direction(-1, 0);
-      case 'E':
-        return new Direction(1, 0);
-      case 'NW':
-        return new Direction(-1, -1);
-      case 'NE':
-        return new Direction(1, -1);
-      case 'SW':
-        return new Direction(-1, 1);
-      case 'SE':
-        return new Direction(1, 1);
-    }
+  static fromInput(input: string): Direction[] {
+    return input.split('').map((char) => {
+      switch (char) {
+        case '^':
+          return Direction.N;
+        case 'v':
+          return Direction.S;
+        case '<':
+          return Direction.W;
+        case '>':
+          return Direction.E;
+        case '↗':
+          return Direction.NE;
+        case '↘':
+          return Direction.SE;
+        case '↙':
+          return Direction.SW;
+        case '↖':
+          return Direction.NW;
+        default:
+          throw new Error('Invalid direction');
+      }
+    });
+  }
+
+  print(): void {
+    if (this.equals(Direction.N)) console.log('^');
+    else if (this.equals(Direction.S)) console.log('v');
+    else if (this.equals(Direction.W)) console.log('<');
+    else if (this.equals(Direction.E)) console.log('>');
+    else if (this.equals(Direction.NE)) console.log('↗');
+    else if (this.equals(Direction.NW)) console.log('↖');
+    else if (this.equals(Direction.SW)) console.log('↙');
+    else if (this.equals(Direction.SE)) console.log('↘');
   }
 
   isVertical(): boolean {
@@ -169,26 +193,26 @@ export class Direction {
   }
 
   rotateRight(): Direction {
-    if (this.x === 0 && this.y === -1) return new Direction(1, 0);
-    if (this.x === 1 && this.y === 0) return new Direction(0, 1);
-    if (this.x === 0 && this.y === 1) return new Direction(-1, 0);
-    if (this.x === -1 && this.y === 0) return new Direction(0, -1);
-    if (this.x === -1 && this.y === -1) return new Direction(1, -1);
-    if (this.x === 1 && this.y === -1) return new Direction(1, 1);
-    if (this.x === -1 && this.y === 1) return new Direction(-1, 1);
-    if (this.x === 1 && this.y === 1) return new Direction(-1, -1);
+    if (this.equals(Direction.N)) return Direction.E;
+    if (this.equals(Direction.E)) return Direction.S;
+    if (this.equals(Direction.S)) return Direction.W;
+    if (this.equals(Direction.W)) return Direction.N;
+    if (this.equals(Direction.NW)) return Direction.NE;
+    if (this.equals(Direction.NE)) return Direction.SE;
+    if (this.equals(Direction.SE)) return Direction.SW;
+    if (this.equals(Direction.SW)) return Direction.NW;
     throw new Error('Invalid direction');
   }
 
   rotateLeft(): Direction {
-    if (this.x === 0 && this.y === -1) return new Direction(-1, 0);
-    if (this.x === -1 && this.y === 0) return new Direction(0, 1);
-    if (this.x === 0 && this.y === 1) return new Direction(1, 0);
-    if (this.x === 1 && this.y === 0) return new Direction(0, -1);
-    if (this.x === -1 && this.y === -1) return new Direction(-1, 1);
-    if (this.x === 1 && this.y === -1) return new Direction(-1, -1);
-    if (this.x === -1 && this.y === 1) return new Direction(1, 1);
-    if (this.x === 1 && this.y === 1) return new Direction(1, -1);
+    if (this.equals(Direction.N)) return Direction.W;
+    if (this.equals(Direction.W)) return Direction.S;
+    if (this.equals(Direction.S)) return Direction.E;
+    if (this.equals(Direction.E)) return Direction.N;
+    if (this.equals(Direction.NW)) return Direction.SW;
+    if (this.equals(Direction.SW)) return Direction.SE;
+    if (this.equals(Direction.SE)) return Direction.NE;
+    if (this.equals(Direction.NE)) return Direction.NW;
     throw new Error('Invalid direction');
   }
 
@@ -265,6 +289,28 @@ export class BaseLocationMap<T extends BaseLocation> {
         map.map[y][x] = parseInput(char, x, y);
         map.map[y][x].x = x;
         map.map[y][x].y = y;
+      });
+    });
+
+    return map;
+  }
+
+  // used for 2024 day 15 part B, where each character is 2 locations wide
+  static createFromInput2<T extends BaseLocation>(
+    input: string[],
+    parseInput: (char: string, x: number, y: number) => [T, T]
+  ): BaseLocationMap<T> {
+    const map = new BaseLocationMap<T>();
+    input.forEach((line, y) => {
+      map.map[y] = [];
+      line.split('').forEach((char, x) => {
+        const [locA, locB] = parseInput(char, x, y);
+        map.map[y][x * 2] = locA;
+        map.map[y][x * 2].x = x * 2;
+        map.map[y][x * 2].y = y;
+        map.map[y][x * 2 + 1] = locB;
+        map.map[y][x * 2 + 1].x = x * 2 + 1;
+        map.map[y][x * 2 + 1].y = y;
       });
     });
 
@@ -403,7 +449,7 @@ export class BaseArea<T extends BaseLocation, M extends BaseLocationMap<T>> {
 
 export class LocationRunner {
   pos: Point = { x: 0, y: 0 };
-  direction: Direction = Direction.getDirection('N');
+  direction: Direction = Direction.N;
 
   moveForwardWhile<
     T extends BaseLocationMap<L>,
