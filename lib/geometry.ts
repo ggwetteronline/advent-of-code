@@ -355,6 +355,17 @@ export class BaseLocationMap<T extends BaseLocation> {
       this.map.map((row) => row.map((loc) => callback(loc)).join('')).join('\n')
     );
   }
+  printPadded(padding: number, callback: (location: T) => string): void {
+    console.log(
+      this.map
+        .map((row) =>
+          row
+            .map((loc) => ' ' + callback(loc).padStart(padding - 2) + ' ')
+            .join('')
+        )
+        .join('\n')
+    );
+  }
 
   createAreas<U extends BaseArea<T, BaseLocationMap<T>>>(
     createArea: (loc: T, map: BaseLocationMap<T>) => U,
