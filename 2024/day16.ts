@@ -25,24 +25,6 @@ export function run(data: string[], part: 'A' | 'B') {
   }
 }
 
-function printCost(map: BaseLocationMap<Location>) {
-  map.printPadded(8, (loc) => {
-    if (loc.cost !== undefined) {
-      return loc.cost.toString();
-    }
-    return loc.wall ? '#' : '.';
-  });
-}
-
-function printVisited(map: BaseLocationMap<Location>) {
-  map.print((loc) => {
-    if (loc.visited) {
-      return 'O';
-    }
-    return loc.wall ? '#' : '.';
-  });
-}
-
 class Location extends BaseLocation {
   wall = false;
   cost: number | undefined = undefined;
@@ -113,6 +95,26 @@ class Location extends BaseLocation {
       }
     }
   }
+}
+
+// for debugging
+
+function printCost(map: BaseLocationMap<Location>) {
+  map.printPadded(8, (loc) => {
+    if (loc.cost !== undefined) {
+      return loc.cost.toString();
+    }
+    return loc.wall ? '#' : '.';
+  });
+}
+
+function printVisited(map: BaseLocationMap<Location>) {
+  map.print((loc) => {
+    if (loc.visited) {
+      return 'O';
+    }
+    return loc.wall ? '#' : '.';
+  });
 }
 
 export const runs: Run<number>[] = [

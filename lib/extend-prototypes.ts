@@ -35,6 +35,7 @@ declare global {
     isDescending(): boolean;
     isAscending(): boolean;
     includesAll(needles: T[]): boolean;
+    equals(other: T[]): boolean;
 
     // calculations
     sum(add?: (a: T) => number): number;
@@ -198,6 +199,28 @@ Array.prototype.hasIndex2D = function (y_row: number, x_col: number): boolean {
     x_col >= 0 &&
     x_col < this[y_row].length
   );
+};
+
+/**
+ * Compares two arrays. If the array contains objects, it will use the equals function of the objects.
+ * @other the array to compare to
+ * @returns true if the arrays are equal, false otherwise
+ */
+Array.prototype.equals = function (other: any[]): boolean {
+  if (this.length !== other.length) return false;
+  const hasEquals = this[0].equals;
+  // use equals function if available
+  if (hasEquals) {
+    for (let i = 0; i < this.length; i++) {
+      if (this[i].equals(other[i]) == false) return false;
+    }
+  } else {
+    // otherwise use normal comparison (for numbers, strings, ...)
+    for (let i = 0; i < this.length; i++) {
+      if (this[i] !== other[i]) return false;
+    }
+  }
+  return true;
 };
 
 Array.prototype.centerIndex = function (): number {

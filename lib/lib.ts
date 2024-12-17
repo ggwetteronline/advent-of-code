@@ -26,6 +26,16 @@ export class lib {
       .filter((a) => !isNaN(a));
   }
 
+  static getAllNums(input: string | string[]): number[] {
+    input = (Array.isArray(input) ? input.join(' ') : input) as string;
+    return input.match(/-?\d+/g)!.map(Number);
+  }
+
+  static getAllBigInts(input: string | string[]): bigint[] {
+    input = (Array.isArray(input) ? input.join(' ') : input) as string;
+    return input.match(/-?\d+/g)!.map(BigInt);
+  }
+
   static getAll<T>(input: string, regexp: RegExp, single: boolean = true): T[] {
     const ret: T[] = [];
     let reg: RegExpExecArray | null;
