@@ -317,6 +317,24 @@ export class BaseLocationMap<T extends BaseLocation> {
     return map;
   }
 
+  static createWithSize<T extends BaseLocation>(
+    width: number,
+    height: number,
+    createLocation: () => T
+  ): BaseLocationMap<T> {
+    const map = new BaseLocationMap<T>();
+    for (let y = 0; y < height; y++) {
+      map.map[y] = [];
+      for (let x = 0; x < width; x++) {
+        map.map[y][x] = createLocation();
+        map.map[y][x].x = x;
+        map.map[y][x].y = y;
+      }
+    }
+
+    return map;
+  }
+
   map: T[][] = [];
 
   constructor() {}
