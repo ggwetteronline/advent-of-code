@@ -1,4 +1,4 @@
-import { recursiveWithMemo as recursiveWithMemory, Run } from '../lib';
+import { recursiveWithMemory, Run } from '../lib';
 
 // function logic
 export function run(data: string[], part: 'A' | 'B') {

@@ -103,6 +103,32 @@ export class lib {
   static time(): string {
     return new Date().toLocaleDateString();
   }
+
+  /**
+   *
+   * @param from smallest number to check
+   * @param to highest number to check
+   * @param check check function. return -1 if number is too low, 0 if number is correct, 1 if number is too high
+   * @returns the number till a result is found, otherwise the highest to low number
+   */
+  static checkBinaryWithInput(
+    from: number,
+    to: number,
+    check: (n: number) => -1 | 0 | 1
+  ): number {
+    while (from < to) {
+      const mid = Math.floor((from + to) / 2);
+      const checkResult = check(mid);
+      if (checkResult === 0) {
+        return mid;
+      } else if (checkResult === -1) {
+        from = mid + 1;
+      } else {
+        to = mid;
+      }
+    }
+    return from - 1;
+  }
 }
 
 // Attention! using this method can double the execution time compared to a recursive function with memo without inner function call
@@ -123,4 +149,25 @@ export function recursiveWithMemory<T>(
     return result;
   };
   return recursiveRun(...args);
+}
+
+export function forEachRecursiveWithMemory<T, E>(
+  fun: (recursion: (...args2: any[]) => T, ...args: any[]) => T,
+  forE: E[],
+  ...args: any[]
+): T[] {
+  const memo: Map<string, T> = new Map<string, T>();
+
+  const recursiveRun = (...args: any[]) => {
+    const key = args.join('-');
+    if (memo.has(key)) {
+      return memo.get(key)!;
+    }
+    const result = fun(recursiveRun, ...args);
+    memo.set(key, result);
+    return result;
+  };
+  const arr: T[] = [];
+  forE.forEach((e) => arr.push(recursiveRun(e, ...args)));
+  return arr;
 }

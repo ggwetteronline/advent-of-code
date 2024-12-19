@@ -224,12 +224,14 @@ export class Direction {
   }
 }
 
-export abstract class BaseLocation {
+export class BaseLocation {
   x = 0;
   y = 0;
   visited: boolean = false;
   movedThroughDirections: Direction[] = [];
   partOfArea = false;
+  wall = false;
+  cost: number | undefined = undefined;
 
   copy(newLocation = this.constructor()): BaseLocation {
     newLocation.x = this.x;
@@ -238,17 +240,18 @@ export abstract class BaseLocation {
     newLocation.movedThroughDirections = this.movedThroughDirections.map(
       (dir) => dir.copy()
     );
+    newLocation.partOfArea = this.partOfArea;
+    newLocation.wall = this.wall;
+    newLocation.cost = this.cost;
     return newLocation;
   }
 
   moveThrough(direction: Direction) {
     this.visited = true;
-    this.movedThroughDirections.push(new Direction(direction.x, direction.y));
+    this.movedThroughDirections.push(direction.copy());
   }
   wasMovedThroughInThisDirection(direction: Direction) {
-    return this.movedThroughDirections.some(
-      (dir) => dir.x === direction.x && dir.y === direction.y
-    );
+    return this.movedThroughDirections.some((dir) => dir.equals(direction));
   }
 
   addRecursiveToArea<T extends BaseLocation>(
@@ -319,8 +322,8 @@ export class BaseLocationMap<T extends BaseLocation> {
 
   static createWithSize<T extends BaseLocation>(
     width: number,
-    height: number,
-    createLocation: () => T
+    height: number = width, // default to square
+    createLocation: () => T = () => new BaseLocation() as T
   ): BaseLocationMap<T> {
     const map = new BaseLocationMap<T>();
     for (let y = 0; y < height; y++) {
@@ -399,6 +402,42 @@ export class BaseLocationMap<T extends BaseLocation> {
     });
 
     return areas;
+  }
+
+  /**
+   * calculates the fastest path from one location to another
+   * with djiikstra algorithm, where each step has a cost of 1
+   * @param from start Point
+   * @param to end Point
+   * @returns cost to reach end or undefined if no path was found
+   */
+  calcuateFastesPath(from: Point, to: Point): number | undefined {
+    const start = this.map[from.y][from.x];
+    const end = this.map[to.y][to.x];
+    start.cost = 0;
+    const directions = Direction.getDirectionsArray('+');
+    const checkLocations = [start];
+    while (checkLocations[0] !== end) {
+      const current = checkLocations.shift()!;
+      for (const dir of directions) {
+        const nextPos = dir.go(current);
+        if (this.hasPosition(nextPos)) {
+          const nextLocation = this.getLocation(nextPos);
+          if (nextLocation.wall) continue;
+          if (
+            nextLocation.cost == undefined ||
+            nextLocation.cost > current.cost! + 1
+          ) {
+            nextLocation.cost = current.cost! + 1;
+            checkLocations.push(nextLocation);
+          }
+        }
+      }
+      if (checkLocations.length == 0) {
+        return undefined;
+      }
+    }
+    return end.cost;
   }
 }
 
