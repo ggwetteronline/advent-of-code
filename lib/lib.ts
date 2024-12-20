@@ -133,41 +133,17 @@ export class lib {
 
 // Attention! using this method can double the execution time compared to a recursive function with memo without inner function call
 export function recursiveWithMemory<T>(
-  //keyfun: (...args: any[]) => string,
   fun: (recursion: (...args2: any[]) => T, ...args: any[]) => T,
+  keyfun: undefined | ((...args: any[]) => string) = undefined,
   ...args: any[]
 ): T {
   const memo: Map<string, T> = new Map<string, T>();
-
   const recursiveRun = (...args: any[]) => {
-    const key = args.join('-'); //keyfun(args);
-    if (memo.has(key)) {
-      return memo.get(key)!;
-    }
+    const key = keyfun ? keyfun(args) : args.join('-');
+    if (memo.has(key)) return memo.get(key)!;
     const result = fun(recursiveRun, ...args);
     memo.set(key, result);
     return result;
   };
   return recursiveRun(...args);
-}
-
-export function forEachRecursiveWithMemory<T, E>(
-  fun: (recursion: (...args2: any[]) => T, ...args: any[]) => T,
-  forE: E[],
-  ...args: any[]
-): T[] {
-  const memo: Map<string, T> = new Map<string, T>();
-
-  const recursiveRun = (...args: any[]) => {
-    const key = args.join('-');
-    if (memo.has(key)) {
-      return memo.get(key)!;
-    }
-    const result = fun(recursiveRun, ...args);
-    memo.set(key, result);
-    return result;
-  };
-  const arr: T[] = [];
-  forE.forEach((e) => arr.push(recursiveRun(e, ...args)));
-  return arr;
 }

@@ -14,6 +14,7 @@ export function run(data: string[], part: 'A' | 'B') {
             .map((n) => rec(n, repeat - 1))
             .sum();
         },
+        undefined,
         n,
         blink
       );

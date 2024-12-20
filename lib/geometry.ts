@@ -283,9 +283,10 @@ export class BaseLocation {
 export class BaseLocationMap<T extends BaseLocation> {
   static createFromInput<T extends BaseLocation>(
     input: string[],
-    parseInput: (char: string, x: number, y: number) => T
+    parseInput: (char: string, x: number, y: number) => T,
+    map?: BaseLocationMap<T>
   ): BaseLocationMap<T> {
-    const map = new BaseLocationMap<T>();
+    if (map == undefined) map = new BaseLocationMap<T>();
     input.forEach((line, y) => {
       map.map[y] = [];
       line.split('').forEach((char, x) => {
@@ -338,6 +339,13 @@ export class BaseLocationMap<T extends BaseLocation> {
     return map;
   }
 
+  get width(): number {
+    return this.map[0].length;
+  }
+  get height(): number {
+    return this.map.length;
+  }
+
   map: T[][] = [];
 
   constructor() {}
@@ -361,6 +369,40 @@ export class BaseLocationMap<T extends BaseLocation> {
 
   getLocation(point: Point): T {
     return this.map[point.y][point.x];
+  }
+
+  getAllWallsThatAreNotBorders(): T[] {
+    return this.allLocations().filter(
+      (loc) =>
+        loc.wall &&
+        loc.x.between(1, this.width - 2) &&
+        loc.y.between(1, this.height - 2)
+    );
+  }
+
+  getAllLocationsWithDistanceTo(
+    location: Point,
+    maxDistance: number
+  ): [T, number][] {
+    const result: [T, number][] = [];
+    const startX = Math.max(0, location.x - maxDistance);
+    const endX = Math.min(this.map[0].length - 1, location.x + maxDistance);
+    const startY = Math.max(0, location.y - maxDistance);
+    const endY = Math.min(this.map.length - 1, location.y + maxDistance);
+
+    // use for-loops instead allLocations.filter because it is twice as fast
+    for (let y = startY; y <= endY; y++) {
+      for (let x = startX; x <= endX; x++) {
+        const loc = this.map[y][x];
+        const dist =
+          Math.abs(loc.x - location.x) + Math.abs(loc.y - location.y);
+        if (dist <= maxDistance) {
+          result.push([loc, dist]);
+        }
+      }
+    }
+
+    return result;
   }
 
   for(callback: (location: T, x: number, y: number) => void) {

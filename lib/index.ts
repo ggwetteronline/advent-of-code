@@ -1,10 +1,5 @@
 import './extend-prototypes';
-import {
-  lib,
-  Run,
-  recursiveWithMemory,
-  forEachRecursiveWithMemory,
-} from './lib';
+import { lib, Run, recursiveWithMemory } from './lib';
 import {
   Direction,
   Point,
@@ -18,7 +13,6 @@ import {
 export {
   lib,
   recursiveWithMemory,
-  forEachRecursiveWithMemory,
   type Run,
   BaseLocation,
   BaseLocationMap,
