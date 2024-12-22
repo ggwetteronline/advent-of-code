@@ -1,5 +1,4 @@
-import { time } from 'console';
-import { BaseLocation, BaseLocationMap, Direction, Point, Run } from '../lib';
+import { BaseLocation, BaseLocationMap, Run } from '../lib';
 
 // main function
 export function run(data: string[], part: 'A' | 'B') {
@@ -54,7 +53,7 @@ class LocationMap extends BaseLocationMap<BaseLocation> {
     return allStartCheatLocations.flatMap((startL) => {
       return this.getAllLocationsWithDistanceTo(startL, maxCheatTime)
         .map(([otherLocation, distance]) => {
-          if (otherLocation.wall == false && distance <= maxCheatTime) {
+          if (otherLocation.wall == false) {
             return otherLocation.cost! - (startL.cost! + distance); // how much we save
           }
           return undefined;
