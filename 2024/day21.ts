@@ -16,7 +16,7 @@ export function run(data: string[], part: 'A' | 'B') {
       for (let i = 0; i <= directionPads.length; i++) {
         const newRes = new Memory();
         for (const [key, value] of res.entries()) {
-          const [x, y, f] = key
+          const [x, y, evilPath] = key
             .split(',')
             .map((v, i) => (i < 2 ? parseInt(v) : v === 'true')) as [
             number,
@@ -28,8 +28,9 @@ export function run(data: string[], part: 'A' | 'B') {
             'v'.repeat(y > 0 ? y : 0) +
             '^'.repeat(-y > 0 ? -y : 0) +
             '>'.repeat(x > 0 ? x : 0);
+          // dont go through evil path
           const adjustedPath =
-            (f ? path.split('').reverse().join('') : path) + 'A';
+            (evilPath ? path.split('').reverse().join('') : path) + 'A';
           const subRes = directionpad1.steps(adjustedPath, value);
 
           for (const [subKey, subValue] of subRes.entries()) {
@@ -47,15 +48,7 @@ export function run(data: string[], part: 'A' | 'B') {
     .sum();
 }
 
-class Memory extends Map<string, number> {
-  save(x: number, y: number, value: number) {
-    this.set(`${x},${y}`, value);
-  }
-
-  load(x: number, y: number): number {
-    return this.get(`${x},${y}`) || 0;
-  }
-}
+class Memory extends Map<string, number> {}
 
 abstract class Keypad {
   readonly keys: Map<string, Point> = new Map();
