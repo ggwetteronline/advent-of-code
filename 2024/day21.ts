@@ -1,4 +1,4 @@
-import { BaseLocation, Point, Run } from '../lib';
+import { Point, Run } from '../lib';
 
 // function logic
 export function run(data: string[], part: 'A' | 'B') {

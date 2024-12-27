@@ -46,12 +46,12 @@ class Computer {
     other.connections.set(this.name, this);
   }
 
-  getSetsOfThreeConnected(maps: Set<string>) {
+  getSetsOfThreeConnected(sets: Set<string>) {
     Array.from(this.connections.entries()).mapPairs((a, b) => {
       // get connected pairs (both are connected to this, so its a set of 3)
       if (a[1].connections.has(b[0])) {
         // sort the names so we don't get duplicates
-        maps.add([this.name, a[0], b[0]].sort().join(','));
+        sets.add([this.name, a[0], b[0]].sort().join(','));
       }
     });
   }
@@ -60,8 +60,7 @@ class Computer {
     const group: string[] = [this.name];
     const candidates = Array.from(this.connections.values());
     // get everyone who is connected to everyone else in the group
-    for (let i = 0; i < candidates.length; i++) {
-      const candidate = candidates[i];
+    for (const candidate of candidates) {
       if (group.every((name) => candidate.connections.has(name))) {
         group.push(candidate.name);
       }
